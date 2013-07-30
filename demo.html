@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JS RangeSlider Test</title>
+
+	<!--video-js-->
+	<link href="http://vjs.zencdn.net/4.1/video-js.css" rel="stylesheet">
+	<script src="lib/video-js/video.min.js"></script>
+	
+	<!--RangeSlider Pluging-->
+	<script src="build/rangeslider.min.js"></script>
+	<link href="build/rangeslider.min.css" rel="stylesheet">
+	
+    <!--Demo CSS-->
+	<link href="demo.css" rel="stylesheet">
+
+  </head>
+
+  <body style="margin:10px">
+    <h1 class="title">Range Slider for video-js</h1>
+
+	<video id="vid1" class="video-js vjs-default-skin" controls preload="none" width="640" height="264"
+	poster="http://video-js.zencoder.com/oceans-clip.png"
+	data-setup=''>
+		<source src="http://video-js.zencoder.com/oceans-clip.mp4" type='video/mp4' />
+		<source src="http://video-js.zencoder.com/oceans-clip.webm" type='video/webm' />
+		<source src="http://video-js.zencoder.com/oceans-clip.ogv" type='video/ogg' />
+		<track kind="captions" src="demo.captions.vtt" srclang="en" label="English"></track><!-- Tracks need an ending tag thanks to IE9 -->
+	</video>
+	
+	<script>
+		var mplayer=videojs("vid1", {plugins: {rangeslider: {}}});
+
+		function playBetween(){
+			var start,end;
+			start = document.getElementById('Start').value;
+			end = document.getElementById('End').value;
+			mplayer.playBetween(start,end);
+		}
+		function getValues(){
+			var values = {};
+			values = mplayer.getValues();
+			document.getElementById('Start').value=values.start;
+			document.getElementById('End').value=values.end;
+		}
+	</script>
+    <div id="fieldSelection">
+		<legend>Actions</legend>
+		<div class="button" onClick="mplayer.showSlider()">Show RS</div>
+		<div class="button" onClick="mplayer.hideSlider()">Hide RS</div>
+		<div class="button" onClick="mplayer.lockSlider()">Lock RS</div>
+		<div class="button" onClick="mplayer.unlockSlider()">Unlock RS</div>
+	</div>
+	
+	<div id="fieldSelection">
+		<legend>Select a section of the video</legend>
+		<div class="button" onClick="playBetween()">Play Between</div>
+		<div class="button" onClick="getValues()">Get Arrow Values</div><br/>
+		Start (seconds):<input type="text" value="2" id="Start">
+		End (seconds): <input type="text" value="5" id="End">
+	</div>
+    
+  </body>
+
+
+</html>

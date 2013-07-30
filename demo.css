@@ -1,0 +1,63 @@
+.button{
+	margin: 10px;
+	border:1px solid #d7dada;-webkit-box-shadow: #000000 1px 1px 1px  ;-moz-box-shadow: #000000 1px 1px 1px ; box-shadow: #000000 1px 1px 1px  ; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:15px;font-family:arial, helvetica, sans-serif; padding: 7px 7px 7px 7px; text-decoration:none; display:inline-block;font-weight:bold; color: #666666;
+	 background-color: #f4f5f5; background-image: -webkit-gradient(linear, left top, left bottom, from(#f4f5f5), to(#dfdddd));
+	 background-image: -webkit-linear-gradient(top, #f4f5f5, #dfdddd);
+	 background-image: -moz-linear-gradient(top, #f4f5f5, #dfdddd);
+	 background-image: -ms-linear-gradient(top, #f4f5f5, #dfdddd);
+	 background-image: -o-linear-gradient(top, #f4f5f5, #dfdddd);
+	 background-image: linear-gradient(to bottom, #f4f5f5, #dfdddd);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#f4f5f5, endColorstr=#dfdddd);
+}
+
+.button:hover{
+	 border:1px solid #bfc4c4;
+	 background-color: #d9dddd; background-image: -webkit-gradient(linear, left top, left bottom, from(#d9dddd), to(#c6c3c3));
+	 background-image: -webkit-linear-gradient(top, #d9dddd, #c6c3c3);
+	 background-image: -moz-linear-gradient(top, #d9dddd, #c6c3c3);
+	 background-image: -ms-linear-gradient(top, #d9dddd, #c6c3c3);
+	 background-image: -o-linear-gradient(top, #d9dddd, #c6c3c3);
+	 background-image: linear-gradient(to bottom, #d9dddd, #c6c3c3);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#d9dddd, endColorstr=#c6c3c3);
+}
+
+#fieldSelection {
+	text-align: left;
+	padding-left: 20px;
+	padding-right: 20px;
+	line-height: 30px;
+	padding-top: 10px;
+	font-family: Arial,Helvetica,sans-serif;
+	font-size: 14px;
+	color: #333;
+	background-color: #f0f3e7;
+	-webkit-padding-start: 0.75em;
+-webkit-padding-end: 0.75em;
+-webkit-padding-after: 0.625em;
+border: 2px groove threedface;
+border-image-source: initial;
+border-image-slice: initial;
+border-image-width: initial;
+border-image-outset: initial;
+border-image-repeat: initial;
+min-width: -webkit-min-content;
+}
+#fieldSelection legend{
+	font-weight: bold;
+	font-size: 15px;
+	color: #666666;
+	border: 2px solid #666666;
+	background-color: white;
+	border-top-right-radius: 10px;
+	border-radius: 9px;
+}
+#vid1 {
+    display: block!important;
+    margin-left: auto!important;
+    margin-right: auto!important;
+    border: none;
+    margin-top: 0px;
+    margin-bottom: 18px;
+}
+.title{
+	text-align:center;
+	width:100%;
+}
