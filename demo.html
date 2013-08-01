@@ -30,8 +30,11 @@
 	</video>
 	
 	<script>
-		var mplayer=videojs("vid1", {plugins: {rangeslider: {}}});
-
+		
+		//Example of options ={hidden:false,locked:true,panel:false}
+		var options ={hidden:false},
+			mplayer=videojs("vid1", {plugins: {rangeslider: options}});
+         
 		function playBetween(){
 			var start,end;
 			start = document.getElementById('Start').value;
@@ -44,13 +47,34 @@
 			document.getElementById('Start').value=values.start;
 			document.getElementById('End').value=values.end;
 		}
+		
+		function showhide(){
+			var plugin=mplayer.rangeslider.options;
+			if(plugin.hidden)
+				mplayer.showSlider();
+			else
+				mplayer.hideSlider();
+		}
+		function lockunlock(){
+			var plugin=mplayer.rangeslider.options;
+			if(plugin.locked)
+				mplayer.unlockSlider();
+			else
+				mplayer.lockSlider();
+		}
+		function showhidePanel(){
+			var plugin=mplayer.rangeslider.options;
+			if(!plugin.panel)
+				mplayer.showSliderPanel();
+			else
+				mplayer.hideSliderPanel();
+		}
 	</script>
     <div id="fieldSelection">
 		<legend>Actions</legend>
-		<div class="button" onClick="mplayer.showSlider()">Show RS</div>
-		<div class="button" onClick="mplayer.hideSlider()">Hide RS</div>
-		<div class="button" onClick="mplayer.lockSlider()">Lock RS</div>
-		<div class="button" onClick="mplayer.unlockSlider()">Unlock RS</div>
+		<div class="button" onClick="showhide()">Show/Hide RS</div>
+		<div class="button" onClick="lockunlock()">Lock/Unlock RS</div>
+		<div class="button" onClick="showhidePanel()">show/hide Panel</div>
 	</div>
 	
 	<div id="fieldSelection">

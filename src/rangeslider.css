@@ -96,3 +96,33 @@
 	background-color: #FF6565;
 }
 
+
+/* Time Panel */
+.vjs-timepanel-RS{
+	width: 100%;
+	height: 1em;
+	font-weight: bold;
+	font-size: 15px;
+	top: -2em;
+	position: absolute;
+}
+
+.vjs-timepanel-left-RS,
+.vjs-timepanel-right-RS{
+	font-weight: bold;
+	font-size: 15px;
+	color: #666666;
+	border: 2px solid #666666;
+	background-color: white;
+	border-radius: 5px;
+	position: absolute;
+	width:3em;
+	left: -1.5em;
+	height:100%
+}
+.vjs-timepanel-left-RS{
+	left:0.5%
+}
+.vjs-timepanel-right-RS{
+	left:92%
+}
