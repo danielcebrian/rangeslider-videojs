@@ -221,8 +221,8 @@ videojs.Player.prototype.hideSliderPanel = function(){
 };
 
 //Set a Value in second for the arrows
-videojs.Player.prototype.setValue = function(index, value){
-	return this.rangeslider.setValue(options);
+videojs.Player.prototype.setValueSlider = function(index, value){
+	return this.rangeslider.setValue(index, value);
 };
 
 //The video will be played in a selected section
@@ -231,7 +231,7 @@ videojs.Player.prototype.playBetween = function(start, end){
 };
 
 //Set a Value in second for the arrows
-videojs.Player.prototype.getValues = function(){
+videojs.Player.prototype.getValueSlider = function(){
 	return this.rangeslider.getValues();
 };
 
@@ -376,7 +376,10 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left) {
 				ObjLeft.style.zIndex = 25;
 		else
 				ObjLeft.style.zIndex = 10;
-		var MaxP=92.0,MinP=0.5,MaxDisP=7.5;
+		var MaxP,MinP,MaxDisP;
+		MaxP = this.player_.isFullScreen?96:92;
+		MinP = this.player_.isFullScreen?0.1:0.5;
+		MaxDisP = this.player_.isFullScreen?3.75:7.5;
 		if (index===0){
 			tpl.style.left = Math.max(MinP,Math.min(MaxP,videojs.round(this.handleValue * 100 - MaxDisP/2, 2))) + '%';
 			
