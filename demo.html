@@ -44,8 +44,8 @@
 		function getValues(){
 			var values = {};
 			values = mplayer.getValueSlider();
-			document.getElementById('Start').value=values.start;
-			document.getElementById('End').value=values.end;
+			document.getElementById('Start').value=videojs.round(values.start,2);
+			document.getElementById('End').value=videojs.round(values.end,2);
 		}
 		
 		function showhide(){

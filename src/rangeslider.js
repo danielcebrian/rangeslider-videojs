@@ -23,7 +23,6 @@ function RangeSlider_(options){
 		if (plugin.options.hidden)
 			plugin.hide(); //Hide the Range Slider
 			
-		
 		if(plugin.options.locked) 
 			plugin.lock(); //Lock the Range Slider
 			
@@ -72,11 +71,16 @@ RangeSlider.prototype = {
 		var player = this.player || {};
 		
 		this.updatePrecision = 3;
-
+		
+		//position in second of the arrows
+		this.start = 0;
+		this.end = 0;
+		
+		//components of the plugin
 		var seekBar = player.controlBar.progressControl.seekBar;
 		this.components.RSTimeBar = seekBar.RSTimeBar;
 		
-		//Save local variables
+		//Save local component 
 		this.rstb = this.components.RSTimeBar;
 		this.box = this.rstb.SeekRSBar;
 		this.bar = this.box.SelectionBar;
@@ -117,19 +121,19 @@ RangeSlider.prototype = {
 		if (typeof this.tp !='undefined')
 			this.tp.hide();
 	},
-	setValue: function(index, value) {
-		//index = 0 for the left Arrow and 1 for the right Arrow
-		var val = this._percent(value);
+	setValue: function(index, seconds) {
+		//index = 0 for the left Arrow and 1 for the right Arrow. Value in seconds
+		var percent = this._percent(seconds);
 		var isValidIndex = (index === 0 || index === 1);
 		var isChangeable = !this.locked;
 
 		if(isChangeable && isValidIndex)
-			this.box.setPosition(index,val);
+			this.box.setPosition(index,percent);
 	},
-	getValues: function() {
+	getValues: function() { //get values in seconds
 		var values = {}, start, end;
-		start = this._getArrowValue(0);
-		end = this._getArrowValue(1);
+		start = this.start || this._getArrowValue(0);
+		end = this.end || this._getArrowValue(1);
 		return {start:start, end:end};
 	},
 	playBetween: function(start, end) {
@@ -155,33 +159,35 @@ RangeSlider.prototype = {
 		
 		duration = typeof duration == 'undefined'? 0 : duration;
 		
-		var percent = this[index === 0? "left" : "right"].el_.style.left.replace("%","");
-		if (percent == "")
-			percent = index === 0? 0 : 100;
+		var percentage = this[index === 0? "left" : "right"].el_.style.left.replace("%","");
+		if (percentage == "")
+			percentage = index === 0? 0 : 100;
 			
-		return videojs.round(Math.min(duration, Math.max(0, duration * percent / 100)),this.updatePrecision-1);
+		return videojs.round(this._seconds(percentage / 100),this.updatePrecision-1);
 	},
-	_percent: function(value) {
+	_percent: function(seconds) {
 		var duration = this.player.duration();
 		if(isNaN(duration)) {
 			return 0;
 		}
-		return Math.min(1, Math.max(0, value / duration));
+		return Math.min(1, Math.max(0, seconds / duration));
+	},
+	_seconds: function(percent) { 
+		var duration = this.player.duration();
+		if(isNaN(duration)) {
+			return 0;
+		}
+		return Math.min(duration, Math.max(0, percent * duration));
 	},
 	_reset: function() {
 		var duration = this.player.duration();
 		this.setValue(0,0);
 		this.setValue(1,duration);
 	},
-	_formatTime: function(percent) {
+	_formatTime: function(percentage) {
 		var duration = this.player.duration();
-		var second = Math.min(duration, Math.max(0, duration * percent / 100+0.001));
-		var d=new Date(second*1000);
-		var hour = (d.getHours()==0)?23:d.getHours()-1;
-		var hour = (hour<=9)?"0"+hour:hour;
-		var minute = (d.getMinutes()<=9)?"0"+d.getMinutes():d.getMinutes();
-		var second = (d.getSeconds()<=9)?"0"+d.getSeconds():d.getSeconds();
-		return minute+":"+second;
+		var second = Math.min(duration, Math.max(0, duration * percentage / 100));
+		return videojs.formatTime(second);
 	},
 };
 
@@ -221,8 +227,8 @@ videojs.Player.prototype.hideSliderPanel = function(){
 };
 
 //Set a Value in second for the arrows
-videojs.Player.prototype.setValueSlider = function(index, value){
-	return this.rangeslider.setValue(index, value);
+videojs.Player.prototype.setValueSlider = function(index, seconds){
+	return this.rangeslider.setValue(index, seconds);
 };
 
 //The video will be played in a selected section
@@ -369,6 +375,8 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left) {
 	if ((index === 0 ?bar.updateLeft(left):bar.updateRight(left))){
 		Obj.style.left = videojs.round(this.handleValue * 100, 2) + '%';
 		index === 0 ?bar.updateLeft(left):bar.updateRight(left);
+		
+		this.rs[index === 0 ? 'start' : 'end'] = this.rs._seconds(left);
 	
 		//Fix the problem  when you press the button and the two arrow are underhand
 		//left.zIndex = 10 and right.zIndex=20. This is always less in this case:
@@ -376,6 +384,7 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left) {
 				ObjLeft.style.zIndex = 25;
 		else
 				ObjLeft.style.zIndex = 10;
+		
 		var MaxP,MinP,MaxDisP;
 		MaxP = this.player_.isFullScreen?96:92;
 		MinP = this.player_.isFullScreen?0.1:0.5;

@@ -47,19 +47,6 @@ In addition, to load and control the plugin from Javascript must add a few lines
 
 ```js
 var mplayer=videojs("vid1", {plugins: {rangeslider: {}}}); //To load the video player with the plugin
-
-function playBetween(){
-	var start,end;
-	start = document.getElementById('Start').value;
-	end = document.getElementById('End').value;
-	mplayer.playBetween(start,end); //Function to play a region of the video
-}
-function getValues(){
-	var values = {};
-	values = mplayer.getValues(); //Function to get the value of the selected region of the video
-	document.getElementById('Start').value=values.start;
-	document.getElementById('End').value=values.end;
-}
 ```
 	
 #API Methods
