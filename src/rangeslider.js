@@ -19,6 +19,8 @@ function RangeSlider_(options){
 		plugin.tp.init_();
 		plugin.tpl.init_();
 		plugin.tpr.init_();
+		plugin.ctpl.init_();
+		plugin.ctpr.init_();
 		
 		if (plugin.options.hidden)
 			plugin.hide(); //Hide the Range Slider
@@ -28,6 +30,9 @@ function RangeSlider_(options){
 			
 		if(plugin.options.panel==false) 
 			plugin.hidePanel(); //Hide the second Panel
+			
+		if(plugin.options.controlTime==false) 
+			plugin.hidecontrolTime(); //Hide the control time panel
 
 		plugin._reset();
 	}
@@ -58,6 +63,9 @@ function RangeSlider(player,options){
 		
 	if(!options.hasOwnProperty('panel')) 
 		options.panel = true; // Show Second Panel
+		
+	if(!options.hasOwnProperty('controlTime')) 
+		options.controlTime = true; // Show Control Time to set the arrows in the edition
 	
 	this.options = options;
 	
@@ -77,8 +85,10 @@ RangeSlider.prototype = {
 		this.end = 0;
 		
 		//components of the plugin
-		var seekBar = player.controlBar.progressControl.seekBar;
+		var controlBar = player.controlBar;
+		var seekBar = controlBar.progressControl.seekBar;
 		this.components.RSTimeBar = seekBar.RSTimeBar;
+		this.components.ControlTimePanel = controlBar.ControlTimePanel;
 		
 		//Save local component 
 		this.rstb = this.components.RSTimeBar;
@@ -89,6 +99,9 @@ RangeSlider.prototype = {
 		this.tp = this.box.TimePanel;
 		this.tpl = this.tp.TimePanelLeft;
 		this.tpr = this.tp.TimePanelRight;
+		this.ctp = this.components.ControlTimePanel;
+		this.ctpl = this.ctp.ControlTimePanelLeft;
+		this.ctpr = this.ctp.ControlTimePanelRight;
 		
 	},
 	lock: function() {
@@ -103,13 +116,18 @@ RangeSlider.prototype = {
 	},
 	show:function(){
 		this.options.hidden = false;
-		if (typeof this.rstb !='undefined')
+		if (typeof this.rstb !='undefined'){
 			this.rstb.show();
+			if (this.options.controlTime)
+				this.showcontrolTime();
+		}
 	},
 	hide:function(){
 		this.options.hidden = true;
-		if (typeof this.rstb !='undefined')
+		if (typeof this.rstb !='undefined'){
 			this.rstb.hide();
+			this.ctp.hide();
+		}
 	},
 	showPanel:function(){
 		this.options.panel = true;
@@ -121,14 +139,25 @@ RangeSlider.prototype = {
 		if (typeof this.tp !='undefined')
 			this.tp.hide();
 	},
-	setValue: function(index, seconds) {
+	showcontrolTime:function(){
+		this.options.controlTime = true;
+		if (typeof this.ctp !='undefined')
+			this.ctp.show();
+	},
+	hidecontrolTime:function(){
+		this.options.controlTime = false;
+		if (typeof this.ctp !='undefined')
+			this.ctp.hide();
+	},
+	setValue: function(index, seconds, writeControlTime) {
 		//index = 0 for the left Arrow and 1 for the right Arrow. Value in seconds
+		var writeControlTime = typeof writeControlTime!='undefined'?writeControlTime:true;
+		
 		var percent = this._percent(seconds);
 		var isValidIndex = (index === 0 || index === 1);
 		var isChangeable = !this.locked;
-
 		if(isChangeable && isValidIndex)
-			this.box.setPosition(index,percent);
+			this.box.setPosition(index,percent,writeControlTime);
 	},
 	getValues: function() { //get values in seconds
 		var values = {}, start, end;
@@ -184,10 +213,67 @@ RangeSlider.prototype = {
 		this.setValue(0,0);
 		this.setValue(1,duration);
 	},
-	_formatTime: function(percentage) {
-		var duration = this.player.duration();
-		var second = Math.min(duration, Math.max(0, duration * percentage / 100));
-		return videojs.formatTime(second);
+	_checkControlTime: function(index,TextInput,timeOld){
+		var h = TextInput[0],
+			m = TextInput[1],
+			s = TextInput[2],
+			newHour = h.value,
+			newMin = m.value,
+			newSec = s.value,
+			obj, objNew, objOld;
+		index = index || 0;
+		
+		if (newHour != timeOld[0]){
+			obj = h;
+			objNew = newHour;
+			objOld = timeOld[0];
+		}else if (newMin != timeOld[1]){
+			obj = m;
+			objNew = newMin;
+			objOld = timeOld[1];
+		}else if(newSec != timeOld[2]){
+			obj = s;
+			objNew = newSec;
+			objOld = timeOld[2];
+		}else{	
+			return false;
+		}
+	
+		var duration = this.player.duration() || 0,
+			durationSel;
+		
+		var intRegex = /^\d+$/;
+		if(!intRegex.test(objNew) || objNew>60){
+			objNew = objNew ==""?"":objOld;
+		}
+	
+		newHour = newHour == ""?0:newHour;
+		newMin = newMin == ""?0:newMin;
+		newSec = newSec == ""?0:newSec;
+	
+		durationSel = videojs.TextTrack.prototype.parseCueTime(newHour+":"+newMin+":"+newSec);
+		if (durationSel > duration){
+			obj.value = objOld;
+			obj.style.border = "1px solid red";
+		}else{
+			obj.value = objNew;
+			h.style.border = m.style.border = s.style.border = "1px solid transparent";
+			this.setValue(index,durationSel,false);
+		}
+		if (index===1){
+			var oldTimeLeft = this.ctpl.el_.children,
+				durationSelLeft = videojs.TextTrack.prototype.parseCueTime(oldTimeLeft[0].value+":"+oldTimeLeft[1].value+":"+oldTimeLeft[2].value);
+			if (durationSel < durationSelLeft){
+				obj.style.border = "1px solid red";
+			}
+		}else{
+			
+			var oldTimeRight = this.ctpr.el_.children,
+				durationSelRight = videojs.TextTrack.prototype.parseCueTime(oldTimeRight[0].value+":"+oldTimeRight[1].value+":"+oldTimeRight[2].value);
+			if (durationSel > durationSelRight){
+				obj.style.border = "1px solid red";
+			}
+		}
 	},
 };
 
@@ -226,6 +312,17 @@ videojs.Player.prototype.hideSliderPanel = function(){
 	return this.rangeslider.hidePanel();
 };
 
+
+//Show the control Time to edit the position of the arrows
+videojs.Player.prototype.showControlTime = function(){
+	return this.rangeslider.showcontrolTime();
+};
+
+//Hide the control Time to edit the position of the arrows
+videojs.Player.prototype.hideControlTime = function(){
+	return this.rangeslider.hidecontrolTime();
+};
+
 //Set a Value in second for the arrows
 videojs.Player.prototype.setValueSlider = function(index, seconds){
 	return this.rangeslider.setValue(index, seconds);
@@ -247,6 +344,7 @@ videojs.Player.prototype.getValueSlider = function(){
 
 //--Charge the new Component into videojs
 videojs.SeekBar.prototype.options_.children.RSTimeBar={}; //Range Slider Time Bar
+videojs.ControlBar.prototype.options_.children.ControlTimePanel={}; //Button New Annotation
 
 
 
@@ -261,7 +359,6 @@ videojs.SeekBar.prototype.options_.children.RSTimeBar={}; //Range Slider Time Ba
 videojs.RSTimeBar = videojs.Component.extend({
   /** @constructor */
 	init: function(player, options){
-	console.log(player);
 		videojs.Component.call(this, player, options);
 	}
 });
@@ -309,7 +406,7 @@ videojs.SeekRSBar.prototype.options_ = {
 		'SelectionBar': {},
 		'SelectionBarLeft': {},
 		'SelectionBarRight': {},
-		'TimePanel': {}
+		'TimePanel': {},
 	}
 };
 
@@ -344,7 +441,8 @@ videojs.SeekRSBar.prototype.onMouseMove = function(event) {
 		this.setPosition(1,left);
 };
 
-videojs.SeekRSBar.prototype.setPosition = function(index,left) {
+videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) {
+	var writeControlTime = typeof writeControlTime!='undefined'?writeControlTime:true;
 	//index = 0 for left side, index = 1 for right side
 	var handle = this;
 
@@ -366,7 +464,8 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left) {
 		Obj = this.rs[index === 0 ? 'left' : 'right'].el_,
 		tpr = this.rs.tpr.el_,
 		tpl = this.rs.tpl.el_,
-		bar = this.rs.bar;
+		bar = this.rs.bar,
+		ctp = this.rs[index === 0 ? 'ctpl' : 'ctpr'].el_;
 	
 	// Move the handle and bar from the left based on the current distance
 	this.handleValue = left;
@@ -385,26 +484,43 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left) {
 		else
 				ObjLeft.style.zIndex = 10;
 		
+		//-- Panel
 		var MaxP,MinP,MaxDisP;
 		MaxP = this.player_.isFullScreen?96:92;
 		MinP = this.player_.isFullScreen?0.1:0.5;
 		MaxDisP = this.player_.isFullScreen?3.75:7.5;
 		if (index===0){
-			tpl.style.left = Math.max(MinP,Math.min(MaxP,videojs.round(this.handleValue * 100 - MaxDisP/2, 2))) + '%';
+			tpl.style.left = Math.max(MinP,Math.min(MaxP,(this.handleValue * 100 - MaxDisP/2))) + '%';
 			
 			if ((tpr.style.left.replace("%","") - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpl.style.left = Math.max(MinP,Math.min(MaxP,tpr.style.left.replace("%","")-MaxDisP)) + '%';
 				
-			tpl.children[0].innerText = this.rs._formatTime(ObjLeft.style.left.replace("%",""));
+			tpl.children[0].innerText = vjs.formatTime(this.rs._seconds(left));
 		}else{
-			tpr.style.left = Math.max(MinP,Math.min(MaxP,videojs.round(this.handleValue * 100 - MaxDisP/2, 2))) + '%';
+			tpr.style.left = Math.max(MinP,Math.min(MaxP,(this.handleValue * 100 - MaxDisP/2))) + '%';
 			
 			if (((tpr.style.left.replace("%","")||100) - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpr.style.left = Math.max(MinP,Math.min(MaxP,tpl.style.left.replace("%","")-0+MaxDisP)) + '%';
 				
-			tpr.children[0].innerText = this.rs._formatTime(ObjRight.style.left.replace("%",""));
+			tpr.children[0].innerText = vjs.formatTime(this.rs._seconds(left));
 		}
-			
+		//-- Control Time
+		if(writeControlTime){
+			var time = vjs.formatTime(this.rs._seconds(left)).split(":"),
+				h,m,s;
+			if(time.length == 2){
+				h = 00;
+				m = time[0];
+				s = time[1];
+			}else{
+				h = time[0];
+				m = time[1];
+				s = time[2];
+			}
+			ctp.children[0].value = h;
+			ctp.children[1].value = m;
+			ctp.children[2].value = s;
+		}
 	}
 	return true;
 };
@@ -719,5 +835,114 @@ videojs.TimePanelRight.prototype.createEl = function(){
 		className: 'vjs-timepanel-right-RS',
 		innerHTML: '<span class="vjs-time-text">00:00</span>'
 	});
+};
+
+
+/**
+ * This is the control time panel
+ * @param {videojs.Player|Object} player
+ * @param {Object=} options
+ * @constructor
+ */
+videojs.ControlTimePanel= videojs.Component.extend({
+  /** @constructor */
+	init: function(player, options){
+		videojs.Component.call(this, player, options);
+	}
+});
+
+videojs.ControlTimePanel.prototype.init_ = function(){
+    	this.rs = this.player_.rangeslider;
+};
+
+
+videojs.ControlTimePanel.prototype.options_ = {
+	children: {
+		'ControlTimePanelLeft': {},
+		'ControlTimePanelRight': {},
+	}
+};
+
+videojs.ControlTimePanel.prototype.createEl = function(){
+	return videojs.Component.prototype.createEl.call(this, 'div', {
+		className: 'vjs-controltimepanel-RS vjs-control',
+	});
+};
+
+
+/**
+ * This is the control left time panel 
+ * @param {videojs.Player|Object} player
+ * @param {Object=} options
+ * @constructor
+ */
+videojs.ControlTimePanelLeft = videojs.Component.extend({
+  /** @constructor */
+	init: function(player, options){
+		videojs.Component.call(this, player, options);
+		this.on('keyup', this.onKeyUp);
+		this.on('keydown', this.onKeyDown);
+	}
+});
+
+videojs.ControlTimePanelLeft.prototype.init_ = function(){
+    this.rs = this.player_.rangeslider;
+	this.timeOld = {};
+};
+
+videojs.ControlTimePanelLeft.prototype.createEl = function(){
+	return videojs.Component.prototype.createEl.call(this, 'div', {
+		className: 'vjs-controltimepanel-left-RS',
+		innerHTML: 'Start: <input type="text" id="controltimepanel" maxlength="2" value="00"/>:<input type="text" id="controltimepanel" maxlength="2" value="00"/>:<input type="text" id="controltimepanel" maxlength="2" value="00"/>'
+	});
+};
+
+videojs.ControlTimePanelLeft.prototype.onKeyDown = function(event) {
+	this.timeOld[0] = this.el_.children[0].value;
+	this.timeOld[1] = this.el_.children[1].value;
+	this.timeOld[2] = this.el_.children[2].value;
+};
+
+videojs.ControlTimePanelLeft.prototype.onKeyUp = function(event) {
+	this.rs._checkControlTime(0,this.el_.children,this.timeOld);
+};
+
+
+
+/**
+ * This is the control right time panel 
+ * @param {videojs.Player|Object} player
+ * @param {Object=} options
+ * @constructor
+ */
+videojs.ControlTimePanelRight = videojs.Component.extend({
+  /** @constructor */
+	init: function(player, options){
+		videojs.Component.call(this, player, options);
+		this.on('keyup', this.onKeyUp);
+		this.on('keydown', this.onKeyDown);
+	}
+});
+
+videojs.ControlTimePanelRight.prototype.init_ = function(){
+    	this.rs = this.player_.rangeslider;
+    	this.timeOld = {};
+};
+
+videojs.ControlTimePanelRight.prototype.createEl = function(){
+	return videojs.Component.prototype.createEl.call(this, 'div', {
+		className: 'vjs-controltimepanel-right-RS',
+		innerHTML: 'End: <input type="text" id="controltimepanel" maxlength="2" value="00"/>:<input type="text" id="controltimepanel" maxlength="2" value="00"/>:<input type="text" id="controltimepanel" maxlength="2" value="00"/>'
+	});
+};
+
+videojs.ControlTimePanelRight.prototype.onKeyDown = function(event) {
+	this.timeOld[0] = this.el_.children[0].value;
+	this.timeOld[1] = this.el_.children[1].value;
+	this.timeOld[2] = this.el_.children[2].value;
+};
+
+videojs.ControlTimePanelRight.prototype.onKeyUp = function(event) {
+	this.rs._checkControlTime(1,this.el_.children,this.timeOld);
 };
 })();

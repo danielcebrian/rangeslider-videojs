@@ -48,6 +48,17 @@ In addition, to load and control the plugin from Javascript must add a few lines
 ```js
 var mplayer=videojs("vid1", {plugins: {rangeslider: {}}}); //To load the video player with the plugin
 ```
+
+You can specify to the plugin to be loaded with the range slider open, the panel time, etc.. with the initial options. For example:
+
+locked = true/false;
+hidden = true/false;
+panel = true/false;
+controlTime = true/false;
+
+```js
+var mplayer=videojs("vid1", {plugins: {rangeslider: {locked:true,controlTime:false}}}); //This will lock the range slider and won't show the control time panel to set the position of the arrows
+```
 	
 #API Methods
 
@@ -69,6 +80,38 @@ Hide the Slider Bar Component
 	mplayer.hideSlider();
 ```
 
+### showSliderPanel() ###
+
+Show the Panel above the arrow with the current position
+
+```js
+	mplayer.showSliderPanel();
+```
+
+### hideSliderPanel() ###
+
+Hide the Panel above the arrow with the current position
+
+```js
+	mplayer.hideSliderPanel();
+```
+
+### showControlTime() ###
+
+Show the panel to edit the time for the start and end arrows
+
+```js
+	mplayer.showControlTime();
+```
+
+### hideControlTime() ###
+
+Hide the panel to edit the time for the start and end arrows
+
+```js
+	mplayer.hideControlTime();
+```
+
 ### lockSlider() ###
 
 Lock the Slider bar and it will not be possible to change the arrow positions
@@ -85,12 +128,12 @@ Unlock the Slider bar and it will be possible to change the arrow positions
 	mplayer.unlockSlider();
 ```
 
-### setValue() ###
+### setValueSlider() ###
 
 Set a Value in second for the arrows. It is necessary to enter for the left arrow the `index = 0` or the right arrow the `index = 1` and the seconds.
 
 ```js
-	mplayer.setValue(index,seconds);
+	mplayer.setValueSlider(index,seconds);
 ```
 
 ### playBetween() ###
@@ -101,12 +144,12 @@ The video will be played in a selected section. It is necessary to enter the sta
 	mplayer.playBetween(start, end);
 ```
 
-### getValues() ###
+### getValueSlider() ###
 
 Get the Values of the arrows in second.
 
 ```js
-	mplayer.getValues(start, end);
+	mplayer.getValueSlider();
 ```
 
 

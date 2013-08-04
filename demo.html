@@ -69,12 +69,20 @@
 			else
 				mplayer.hideSliderPanel();
 		}
+		function showhideControlTime(){
+			var plugin=mplayer.rangeslider.options;
+			if(!plugin.controlTime)
+				mplayer.showControlTime();
+			else
+				mplayer.hideControlTime();
+		}
 	</script>
     <div id="fieldSelection">
 		<legend>Actions</legend>
 		<div class="button" onClick="showhide()">Show/Hide RS</div>
 		<div class="button" onClick="lockunlock()">Lock/Unlock RS</div>
 		<div class="button" onClick="showhidePanel()">show/hide Panel</div>
+		<div class="button" onClick="showhideControlTime()">show/hide ControlTime</div>
 	</div>
 	
 	<div id="fieldSelection">
