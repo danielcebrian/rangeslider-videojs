@@ -46,9 +46,12 @@ data-setup=''>
 In addition, to load and control the plugin from Javascript must add a few lines of javascript like:
 
 ```js
-var mplayer=videojs("vid1", {plugins: {rangeslider: {}}}); //To load the video player with the plugin
+var options = {},
+	mplayer = videojs("vid1"),
+	mplayer.rangeslider(options);
 ```
 
+The first one was to load the videojs player and the second one is to load the rangeslider plugin
 You can specify to the plugin to be loaded with the range slider open, the panel time, etc.. with the initial options. For example:
 
 locked = true/false;
@@ -57,7 +60,9 @@ panel = true/false;
 controlTime = true/false;
 
 ```js
-var mplayer=videojs("vid1", {plugins: {rangeslider: {locked:true,controlTime:false}}}); //This will lock the range slider and won't show the control time panel to set the position of the arrows
+var options = {locked:true,controlTime:false}, //This will lock the range slider and won't show the control time panel to set the position of the arrows
+	mplayer=videojs("vid1"),
+	mplayer.rangeslider(options); 
 ```
 	
 #API Methods

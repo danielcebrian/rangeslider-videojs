@@ -33,7 +33,8 @@
 		
 		//Example of options ={hidden:false,locked:true,panel:false}
 		var options ={hidden:false},
-			mplayer=videojs("vid1", {plugins: {rangeslider: options}});
+			mplayer=videojs("vid1");
+			mplayer.rangeslider(options);
          
 		function playBetween(){
 			var start,end;

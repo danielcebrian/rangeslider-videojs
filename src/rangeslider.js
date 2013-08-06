@@ -500,14 +500,13 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 			if ((tpr.style.left.replace("%","") - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpl.style.left = Math.max(MinP,Math.min(MaxP,tpr.style.left.replace("%","")-MaxDisP)) + '%';
 				
-			tpl.children[0].innerText = vjs.formatTime(this.rs._seconds(left));
+			tpl.children[0].innerHTML = vjs.formatTime(this.rs._seconds(left));
 		}else{
 			tpr.style.left = Math.max(MinP,Math.min(MaxP,(this.handleValue * 100 - MaxDisP/2))) + '%';
 			
 			if (((tpr.style.left.replace("%","")||100) - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpr.style.left = Math.max(MinP,Math.min(MaxP,tpl.style.left.replace("%","")-0+MaxDisP)) + '%';
-				
-			tpr.children[0].innerText = vjs.formatTime(this.rs._seconds(left));
+			tpr.children[0].innerHTML = vjs.formatTime(this.rs._seconds(left));
 		}
 		//-- Control Time
 		if(writeControlTime){
