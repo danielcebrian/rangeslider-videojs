@@ -165,10 +165,15 @@ RangeSlider.prototype = {
 		end = this.end || this._getArrowValue(1);
 		return {start:start, end:end};
 	},
-	playBetween: function(start, end) {
+	playBetween: function(start, end,showRS) {
+		showRS = typeof showRS == 'undefined'?true:showRS;
+		this.player.pause();
 		this.player.currentTime(start);
 		this.player.play();
-		this.show();
+		if (showRS)
+			this.show();
+		else
+			this.hide();
 		
 		if(this.options.locked) {
 			this.unlock();//It is unlocked to change the bar position. In the end it will return the value.
@@ -242,7 +247,7 @@ RangeSlider.prototype = {
 		var duration = this.player.duration() || 0,
 			durationSel;
 		
-		var intRegex = /^\d+$/;
+		var intRegex = /^\d+$/;//check if the objNew is an integer
 		if(!intRegex.test(objNew) || objNew>60){
 			objNew = objNew ==""?"":objOld;
 		}
@@ -637,17 +642,16 @@ videojs.SelectionBar.prototype.updateRight = function(left) {
 videojs.SelectionBar.prototype.activatePlay = function(start,end){
 	this.timeStart = start;
 	this.timeEnd = end;
-	this.player_.on("timeupdate", function(){
-		this.rangeslider.bar._processPlay();
-	});
+	
+	this.suspendPlay();
+	
+	this.player_.on("timeupdate", videojs.bind(this,this._processPlay));
 };
 videojs.SelectionBar.prototype.suspendPlay = function(){
 	this.fired = false;
-	this.player_.off("timeupdate", function(){
-		this.rangeslider.bar._processPlay();
-	});
+	this.player_.off("timeupdate", videojs.bind(this,this._processPlay));
 };
-videojs.SelectionBar.prototype._processPlay = function (start,end){
+videojs.SelectionBar.prototype._processPlay = function (){
 	//Check if current time is between start and end
     if(this.player_.currentTime() >= this.timeStart && (this.timeEnd < 0 || this.player_.currentTime() < this.timeEnd)){
         if(this.fired){ //Do nothing if start has already been called
@@ -659,8 +663,8 @@ videojs.SelectionBar.prototype._processPlay = function (start,end){
             return;
         }
         this.fired = false; //Set fired flat to false
-        this.player_.currentTime(this.timeEnd);
         this.player_.pause(); //Call end function
+        this.player_.currentTime(this.timeEnd);
         this.suspendPlay();
     }
 };
