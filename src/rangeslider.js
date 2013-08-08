@@ -174,7 +174,6 @@ RangeSlider.prototype = {
 	},
 	playBetween: function(start, end,showRS) {
 		showRS = typeof showRS == 'undefined'?true:showRS;
-		this.player.pause();
 		this.player.currentTime(start);
 		this.player.play();
 		if (showRS)
