@@ -6,7 +6,6 @@ function RangeSlider_(options){
 	
 	player.rangeslider=new RangeSlider(player, options);
 	
-	
 	//When the DOM and the video media is loaded
 	function initialVideoFinished(event) {
 		var plugin = player.rangeslider;
@@ -37,7 +36,6 @@ function RangeSlider_(options){
 		plugin._reset();
 	}
 	this.on('durationchange', initialVideoFinished);
-	
 	
 	console.log("Loaded Plugin RangeSlider");
 }
@@ -159,6 +157,15 @@ RangeSlider.prototype = {
 		if(isChangeable && isValidIndex)
 			this.box.setPosition(index,percent,writeControlTime);
 	},
+	setValues: function(start, end, writeControlTime) {
+		//index = 0 for the left Arrow and 1 for the right Arrow. Value in seconds
+		var writeControlTime = typeof writeControlTime!='undefined'?writeControlTime:true;
+		
+		this._reset();
+		
+		this.setValue(0,start,writeControlTime);
+		this.setValue(1,end,writeControlTime);
+	},
 	getValues: function() { //get values in seconds
 		var values = {}, start, end;
 		start = this.start || this._getArrowValue(0);
@@ -215,6 +222,8 @@ RangeSlider.prototype = {
 	},
 	_reset: function() {
 		var duration = this.player.duration();
+		this.tpl.el_.style.left = '0%';
+		this.tpr.el_.style.left = '100%';
 		this.setValue(0,0);
 		this.setValue(1,duration);
 	},
@@ -328,9 +337,9 @@ videojs.Player.prototype.hideControlTime = function(){
 	return this.rangeslider.hidecontrolTime();
 };
 
-//Set a Value in second for the arrows
-videojs.Player.prototype.setValueSlider = function(index, seconds){
-	return this.rangeslider.setValue(index, seconds);
+//Set a Value in second for both arrows
+videojs.Player.prototype.setValueSlider = function(start, end){
+	return this.rangeslider.setValues(start, end);
 };
 
 //The video will be played in a selected section
@@ -494,6 +503,7 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 		MaxP = this.player_.isFullScreen?96:92;
 		MinP = this.player_.isFullScreen?0.1:0.5;
 		MaxDisP = this.player_.isFullScreen?3.75:7.5;
+		
 		if (index===0){
 			tpl.style.left = Math.max(MinP,Math.min(MaxP,(this.handleValue * 100 - MaxDisP/2))) + '%';
 			

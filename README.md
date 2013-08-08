@@ -135,10 +135,10 @@ Unlock the Slider bar and it will be possible to change the arrow positions
 
 ### setValueSlider() ###
 
-Set a Value in second for the arrows. It is necessary to enter for the left arrow the `index = 0` or the right arrow the `index = 1` and the seconds.
+Set a values in seconds for the position of the arrows.
 
 ```js
-	mplayer.setValueSlider(index,seconds);
+	mplayer.setValueSlider(start,end);
 ```
 
 ### playBetween() ###
