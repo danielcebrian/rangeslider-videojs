@@ -166,8 +166,7 @@ RangeSlider.prototype = {
 		
 		this._reset();
 		
-		this.setValue(0,start,writeControlTime);
-		this.setValue(1,end,writeControlTime);
+		this._setValuesLocked(start,end,writeControlTime);
 	},
 	getValues: function() { //get values in seconds
 		var values = {}, start, end;
@@ -220,15 +219,16 @@ RangeSlider.prototype = {
 		this.tpr.el_.style.left = '100%';
 		this._setValuesLocked(0,duration);
 	},
-	_setValuesLocked: function(start,end){
+	_setValuesLocked: function(start,end, writeControlTime){
+		var writeControlTime = typeof writeControlTime!='undefined'?writeControlTime:true;
 		if(this.options.locked) {
 			this.unlock();//It is unlocked to change the bar position. In the end it will return the value.
-			this.setValue(0,start);
-			this.setValue(1,end);
+			this.setValue(0,start,writeControlTime);
+			this.setValue(1,end,writeControlTime);
 			this.lock();
 		}else{
-			this.setValue(0,start);
-			this.setValue(1,end);
+			this.setValue(0,start,writeControlTime);
+			this.setValue(1,end,writeControlTime);
 		}
 	},
 	_checkControlTime: function(index,TextInput,timeOld){
