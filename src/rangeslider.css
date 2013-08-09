@@ -107,7 +107,7 @@
 	position: absolute;
 	visibility:visible;
 	opacity:1;
-	/*transition-delay:0s;*/
+	transition-delay:0s;
 }
 .vjs-default-skin .vjs-timepanel-RS.disable{
   visibility:hidden;
@@ -139,13 +139,15 @@
 
 /* Control Time Panel */
 .vjs-default-skin .vjs-controltimepanel-RS{
-	width: 34%;
+	width: 18em;
 	font-size: 1em;
 	line-height: 3em;
+	margin: 0;
+	padding: 0;
 }
 
 .vjs-default-skin .vjs-controltimepanel-RS input{
-	width: 1.2em;
+	width: 1.5em;
 	background: rgba(102, 168, 204, 0.16);
 	border: 1px solid transparent;
 	color: black;
@@ -162,5 +164,16 @@
 .vjs-default-skin .vjs-controltimepanel-right-RS{
 	float:right;
 	width: 48%;
+}
+
+
+/* ---------------- Video-js plugin ---------------- */
+
+.vjs-default-skin *, .vjs-default-skin *:before, .vjs-default-skin *:after {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
 }
 

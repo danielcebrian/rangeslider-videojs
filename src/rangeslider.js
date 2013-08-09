@@ -138,7 +138,7 @@ RangeSlider.prototype = {
 	hidePanel:function(){
 		this.options.panel = false;
 		if (typeof this.tp !='undefined')
-				videojs.addClass(this.tp.el_, 'disable');	
+			videojs.addClass(this.tp.el_, 'disable');	
 	},
 	showcontrolTime:function(){
 		this.options.controlTime = true;
