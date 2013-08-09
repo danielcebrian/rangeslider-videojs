@@ -133,12 +133,12 @@ RangeSlider.prototype = {
 	showPanel:function(){
 		this.options.panel = true;
 		if (typeof this.tp !='undefined')
-			this.tp.show();
+			videojs.removeClass(this.tp.el_, 'disable');			
 	},
 	hidePanel:function(){
 		this.options.panel = false;
 		if (typeof this.tp !='undefined')
-			this.tp.hide();
+				videojs.addClass(this.tp.el_, 'disable');	
 	},
 	showcontrolTime:function(){
 		this.options.controlTime = true;

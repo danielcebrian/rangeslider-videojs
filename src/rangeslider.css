@@ -98,17 +98,25 @@
 
 
 /* Time Panel */
-.vjs-timepanel-RS{
+.vjs-default-skin .vjs-timepanel-RS{
 	width: 100%;
 	height: 1em;
 	font-weight: bold;
 	font-size: 15px;
 	top: -2em;
 	position: absolute;
+	visibility:visible;
+	opacity:1;
+	/*transition-delay:0s;*/
+}
+.vjs-default-skin .vjs-timepanel-RS.disable{
+  visibility:hidden;
+  opacity:0;
+  transition:visibility 0s linear 1s,opacity 1s linear;
 }
 
-.vjs-timepanel-left-RS,
-.vjs-timepanel-right-RS{
+.vjs-default-skin .vjs-timepanel-left-RS,
+.vjs-default-skin .vjs-timepanel-right-RS{
 	font-weight: normal;
 	font-size: 1em;
 	color: #666666;
@@ -119,12 +127,14 @@
 	width:3em;
 	height:116%
 }
-.vjs-timepanel-left-RS{
+.vjs-default-skin .vjs-timepanel-left-RS{
 	left:0.5%
 }
-.vjs-timepanel-right-RS{
+.vjs-default-skin .vjs-timepanel-right-RS{
 	left:92%
 }
+
+
 
 
 /* Control Time Panel */
@@ -153,3 +163,4 @@
 	float:right;
 	width: 48%;
 }
+
