@@ -18,6 +18,7 @@ function RangeSlider_(options){
 		plugin.tp.init_();
 		plugin.tpl.init_();
 		plugin.tpr.init_();
+		plugin.ctp.init_();
 		plugin.ctpl.init_();
 		plugin.ctpr.init_();
 		
@@ -104,11 +105,13 @@ RangeSlider.prototype = {
 	},
 	lock: function() {
 		this.options.locked = true;
+		this.ctp.enable(false);
 		if (typeof this.box != 'undefined')
 			videojs.addClass(this.box.el_, 'locked');
 	},
 	unlock: function() {
 		this.options.locked = false;
+		this.ctp.enable();
 		if (typeof this.box !='undefined')
 			videojs.removeClass(this.box.el_, 'locked');
 	},
@@ -181,15 +184,7 @@ RangeSlider.prototype = {
 		else
 			this.hide();
 		
-		if(this.options.locked) {
-			this.unlock();//It is unlocked to change the bar position. In the end it will return the value.
-			this.setValue(0,start);
-			this.setValue(1,end);
-			this.lock();
-		}else{
-			this.setValue(0,start);
-			this.setValue(1,end);
-		}
+		this._setValuesLocked(start,end);
 		
 		this.bar.activatePlay(start,end);
 	},
@@ -223,8 +218,18 @@ RangeSlider.prototype = {
 		var duration = this.player.duration();
 		this.tpl.el_.style.left = '0%';
 		this.tpr.el_.style.left = '100%';
-		this.setValue(0,0);
-		this.setValue(1,duration);
+		this._setValuesLocked(0,duration);
+	},
+	_setValuesLocked: function(start,end){
+		if(this.options.locked) {
+			this.unlock();//It is unlocked to change the bar position. In the end it will return the value.
+			this.setValue(0,start);
+			this.setValue(1,end);
+			this.lock();
+		}else{
+			this.setValue(0,start);
+			this.setValue(1,end);
+		}
 	},
 	_checkControlTime: function(index,TextInput,timeOld){
 		var h = TextInput[0],
@@ -879,6 +884,16 @@ videojs.ControlTimePanel.prototype.createEl = function(){
 	return videojs.Component.prototype.createEl.call(this, 'div', {
 		className: 'vjs-controltimepanel-RS vjs-control',
 	});
+};
+
+videojs.ControlTimePanel.prototype.enable = function(enable){
+	var enable = typeof enable != 'undefined'? enable:true;
+	this.rs.ctpl.el_.children[0].disabled = enable?"":"disabled";
+	this.rs.ctpl.el_.children[1].disabled = enable?"":"disabled";
+	this.rs.ctpl.el_.children[2].disabled = enable?"":"disabled";
+	this.rs.ctpr.el_.children[0].disabled = enable?"":"disabled";
+	this.rs.ctpr.el_.children[1].disabled = enable?"":"disabled";
+	this.rs.ctpr.el_.children[2].disabled = enable?"":"disabled";
 };
 
 
