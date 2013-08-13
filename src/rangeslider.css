@@ -112,7 +112,10 @@
 .vjs-default-skin .vjs-timepanel-RS.disable{
   visibility:hidden;
   opacity:0;
-  transition:visibility 0s linear 1s,opacity 1s linear;
+	-webkit-transition: visibility 1s linear 1s,opacity 1s linear;
+	-moz-transition: visibility 1s linear 1s,opacity 1s linear;
+	-o-transition: visibility 1s linear 1s,opacity 1s linear;
+	transition:visibility 1s linear 1s,opacity 1s linear;
 }
 
 .vjs-default-skin .vjs-timepanel-left-RS,
@@ -142,8 +145,6 @@
 	width: 18em;
 	font-size: 1em;
 	line-height: 3em;
-	margin: 0;
-	padding: 0;
 }
 
 .vjs-default-skin .vjs-controltimepanel-RS input{
@@ -164,6 +165,11 @@
 .vjs-default-skin .vjs-controltimepanel-right-RS{
 	float:right;
 	width: 48%;
+}
+.vjs-default-skin .vjs-controltimepanel-RS input{
+	margin: 0;
+	padding: 0;
+	display: table-cell;
 }
 
 
