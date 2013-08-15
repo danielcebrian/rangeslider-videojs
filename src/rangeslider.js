@@ -178,11 +178,12 @@ RangeSlider.prototype = {
 		showRS = typeof showRS == 'undefined'?true:showRS;
 		this.player.currentTime(start);
 		this.player.play();
-		if (showRS)
+		if (showRS){
 			this.show();
-		else
+			this._reset();
+		}else{
 			this.hide();
-		
+		}
 		this._setValuesLocked(start,end);
 		
 		this.bar.activatePlay(start,end);
@@ -457,6 +458,10 @@ videojs.SeekRSBar.prototype.onMouseMove = function(event) {
 		this.setPosition(0,left);
 	else if (this.rs.right.pressed)
 		this.setPosition(1,left);
+		
+	//Fix a problem with the presition in the display time
+	var currentTimeDisplay = this.player_.controlBar.currentTimeDisplay.content;
+	currentTimeDisplay.innerHTML = '<span class="vjs-control-text">Current Time </span>'+vjs.formatTime(this.rs._seconds(left), this.player_.duration());
 };
 
 videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) {
@@ -475,7 +480,7 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 	// Check index between 0 and 1
 	if(!(index === 0 || index === 1))
 		return false;
-	
+		
 	// Alias
 	var ObjLeft = this.rs.left.el_,
 		ObjRight = this.rs.right.el_,
@@ -490,14 +495,14 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 	
 	//Check if left arrow is passing the right arrow
 	if ((index === 0 ?bar.updateLeft(left):bar.updateRight(left))){
-		Obj.style.left = videojs.round(this.handleValue * 100, 2) + '%';
+		Obj.style.left = (this.handleValue * 100) + '%';
 		index === 0 ?bar.updateLeft(left):bar.updateRight(left);
 		
 		this.rs[index === 0 ? 'start' : 'end'] = this.rs._seconds(left);
 	
 		//Fix the problem  when you press the button and the two arrow are underhand
 		//left.zIndex = 10 and right.zIndex=20. This is always less in this case:
-		if (index === 0 && videojs.round(this.handleValue * 100, 2) >= 90)
+		if (index === 0 && (this.handleValue) >= 90)
 				ObjLeft.style.zIndex = 25;
 		else
 				ObjLeft.style.zIndex = 10;
@@ -514,17 +519,17 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 			if ((tpr.style.left.replace("%","") - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpl.style.left = Math.max(MinP,Math.min(MaxP,tpr.style.left.replace("%","")-MaxDisP)) + '%';
 				
-			tpl.children[0].innerHTML = vjs.formatTime(this.rs._seconds(left));
+			tpl.children[0].innerHTML = videojs.formatTime(this.rs._seconds(left));
 		}else{
 			tpr.style.left = Math.max(MinP,Math.min(MaxP,(this.handleValue * 100 - MaxDisP/2))) + '%';
 			
 			if (((tpr.style.left.replace("%","")||100) - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpr.style.left = Math.max(MinP,Math.min(MaxP,tpl.style.left.replace("%","")-0+MaxDisP)) + '%';
-			tpr.children[0].innerHTML = vjs.formatTime(this.rs._seconds(left));
+			tpr.children[0].innerHTML = videojs.formatTime(this.rs._seconds(left));
 		}
 		//-- Control Time
 		if(writeControlTime){
-			var time = vjs.formatTime(this.rs._seconds(left)).split(":"),
+			var time = videojs.formatTime(this.rs._seconds(left)).split(":"),
 				h,m,s;
 			if(time.length == 2){
 				h = 00;
@@ -566,23 +571,11 @@ videojs.SeekRSBar.prototype.getWidth = function() {
 	return this.rs.left.el_.offsetWidth;//does not matter left or right
 };
 
-videojs.SeekRSBar.prototype.getOffsetLeftPercent = function(offsetleft) {
-	return offsetleft / this.getRSTBWidth();
-};
-videojs.SeekRSBar.prototype.getRawValue = function() {
-	return this.handleValue;
-};
 videojs.SeekRSBar.prototype.getValue = function() {
 	if(this.handleValue !== null) {
 		return videojs.round(this.handleValue * this.player.duration(), 2);
 	}
 	return null;
-};
-videojs.SeekRSBar.prototype.setRawValue = function(rawValue) {
-	this.handleValue = rawValue;
-};
-videojs.SeekRSBar.prototype.setBarUpdateHandler = function(fn) {
-	this.updateBar = fn;
 };
 
 
@@ -625,33 +618,35 @@ videojs.SelectionBar.prototype.onMouseUp = function(){
 };
 
 videojs.SelectionBar.prototype.updateLeft = function(left) {
-	var offsetleft = this.rs.right.el_.offsetLeft;
-	var max = this.rs.box.getOffsetLeftPercent(offsetleft);
-	var width = this.rs.box.getOffsetLeftPercent(offsetleft) - left;
-	var precision = this.rs.updatePrecision;
-	if(videojs.round(left, precision) <= videojs.round(max, precision)) {
-			this.rs.bar.el_.style.left = videojs.round(left * 100, precision) + '%';
-			this.rs.bar.el_.style.width = videojs.round(width * 100, precision) + '%';
+	var rightVal = this.rs.right.el_.style.left!=''?this.rs.right.el_.style.left:100;
+	var right = parseFloat(rightVal) / 100;
+	
+	var width = videojs.round((right - left),this.rs.updatePrecision); //necessary round for not get 0.6e-7 for example that it's not able for the html css width
+	
+	//(right+0.00001) is to fix the precision of the css in html
+	if(left <= (right+0.00001)) {
+			this.rs.bar.el_.style.left = (left * 100) + '%';
+			this.rs.bar.el_.style.width = (width * 100) + '%';
 			return true;
 	}
 	return false;
 };
 		
-videojs.SelectionBar.prototype.updateRight = function(left) {
-	var offsetleft = this.rs.left.el_.offsetLeft;
-	var min = this.rs.box.getOffsetLeftPercent(offsetleft);
+videojs.SelectionBar.prototype.updateRight = function(right) {
+	var leftVal = this.rs.left.el_.style.left!=''?this.rs.left.el_.style.left:0;
+	var left = parseFloat(leftVal) / 100;
 	
-	var width = left - this.rs.box.getOffsetLeftPercent(offsetleft);
-	var precision = this.rs.updatePrecision;
+	var width = videojs.round((right - left),this.rs.updatePrecision);//necessary round for not get 0.6e-7 for example that it's not able for the html css width
 	
-	if(videojs.round(left, precision) >= videojs.round(min, precision)) {
-		var w = videojs.round(width * 100, precision);
-		this.rs.bar.el_.style.width = w + '%';
-		this.rs.bar.el_.style.left = videojs.round(left * 100 - w, precision) + '%';
+	//(right+0.00001) is to fix the precision of the css in html
+	if((right+0.00001) >= left) {
+		this.rs.bar.el_.style.width = (width * 100) + '%';
+		this.rs.bar.el_.style.left = ((right  - width) * 100) + '%';
 		return true;
 	}
 	return false;
 };
+
 videojs.SelectionBar.prototype.activatePlay = function(start,end){
 	this.timeStart = start;
 	this.timeEnd = end;
@@ -660,10 +655,12 @@ videojs.SelectionBar.prototype.activatePlay = function(start,end){
 	
 	this.player_.on("timeupdate", videojs.bind(this,this._processPlay));
 };
+
 videojs.SelectionBar.prototype.suspendPlay = function(){
 	this.fired = false;
 	this.player_.off("timeupdate", videojs.bind(this,this._processPlay));
 };
+
 videojs.SelectionBar.prototype._processPlay = function (){
 	//Check if current time is between start and end
     if(this.player_.currentTime() >= this.timeStart && (this.timeEnd < 0 || this.player_.currentTime() < this.timeEnd)){
