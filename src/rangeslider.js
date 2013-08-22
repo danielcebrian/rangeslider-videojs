@@ -10,17 +10,9 @@ function RangeSlider_(options){
 	function initialVideoFinished(event) {
 		var plugin = player.rangeslider;
 		//All components will be initialize after they have been loaded by videojs
-		plugin.rstb.init_();
-		plugin.box.init_();
-		plugin.bar.init_();
-		plugin.left.init_();
-		plugin.right.init_();
-		plugin.tp.init_();
-		plugin.tpl.init_();
-		plugin.tpr.init_();
-		plugin.ctp.init_();
-		plugin.ctpl.init_();
-		plugin.ctpr.init_();
+		for (var index in plugin.components) {
+			plugin.components[index].init_();
+		}
 		
 		if (plugin.options.hidden)
 			plugin.hide(); //Hide the Range Slider
@@ -35,8 +27,13 @@ function RangeSlider_(options){
 			plugin.hidecontrolTime(); //Hide the control time panel
 
 		plugin._reset();
+		player.trigger('loadedRangeSlider'); //Let know if the Range Slider DOM is ready
 	}
-	this.on('durationchange', initialVideoFinished);
+	if (player.techName == 'Youtube'){
+		player.one('firstplay', initialVideoFinished);
+	}else{
+		player.one('durationchange', initialVideoFinished);
+	}
 	
 	console.log("Loaded Plugin RangeSlider");
 }
@@ -91,16 +88,16 @@ RangeSlider.prototype = {
 		
 		//Save local component 
 		this.rstb = this.components.RSTimeBar;
-		this.box = this.rstb.SeekRSBar;
-		this.bar = this.box.SelectionBar;
-		this.left = this.box.SelectionBarLeft;
-		this.right = this.box.SelectionBarRight;
-		this.tp = this.box.TimePanel;
-		this.tpl = this.tp.TimePanelLeft;
-		this.tpr = this.tp.TimePanelRight;
+		this.box = this.components.SeekRSBar = this.rstb.SeekRSBar;
+		this.bar = this.components.SelectionBar = this.box.SelectionBar;
+		this.left = this.components.SelectionBarLeft = this.box.SelectionBarLeft;
+		this.right = this.components.SelectionBarRight = this.box.SelectionBarRight;
+		this.tp = this.components.TimePanel = this.box.TimePanel;
+		this.tpl = this.components.TimePanelLeft = this.tp.TimePanelLeft;
+		this.tpr = this.components.TimePanelRight = this.tp.TimePanelRight;
 		this.ctp = this.components.ControlTimePanel;
-		this.ctpl = this.ctp.ControlTimePanelLeft;
-		this.ctpr = this.ctp.ControlTimePanelRight;
+		this.ctpl = this.components.ControlTimePanelLeft = this.ctp.ControlTimePanelLeft;
+		this.ctpr = this.components.ControlTimePanelRight = this.ctp.ControlTimePanelRight;
 		
 	},
 	lock: function() {
@@ -363,7 +360,7 @@ videojs.Player.prototype.getValueSlider = function(){
 
 //--Charge the new Component into videojs
 videojs.SeekBar.prototype.options_.children.RSTimeBar={}; //Range Slider Time Bar
-videojs.ControlBar.prototype.options_.children.ControlTimePanel={}; //Button New Annotation
+videojs.ControlBar.prototype.options_.children.ControlTimePanel={}; //Panel with the time of the range slider
 
 
 
@@ -412,7 +409,6 @@ videojs.SeekRSBar = videojs.Component.extend({
 	init: function(player, options){
 		videojs.Component.call(this, player, options);
 		this.on('mousedown', this.onMouseDown);
-		this.handleValue = null; // position of handle on bar, number between 0 and 1
 	}
 });
 
@@ -467,8 +463,8 @@ videojs.SeekRSBar.prototype.onMouseMove = function(event) {
 videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) {
 	var writeControlTime = typeof writeControlTime!='undefined'?writeControlTime:true;
 	//index = 0 for left side, index = 1 for right side
-	var handle = this;
-
+	var index = index || 0;
+	
 	// Position shouldn't change when handle is locked
 	if(this.rs.options.locked)
 		return false;
@@ -490,19 +486,16 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 		bar = this.rs.bar,
 		ctp = this.rs[index === 0 ? 'ctpl' : 'ctpr'].el_;
 	
-	// Move the handle and bar from the left based on the current distance
-	this.handleValue = left;
-	
 	//Check if left arrow is passing the right arrow
 	if ((index === 0 ?bar.updateLeft(left):bar.updateRight(left))){
-		Obj.style.left = (this.handleValue * 100) + '%';
+		Obj.style.left = (left * 100) + '%';
 		index === 0 ?bar.updateLeft(left):bar.updateRight(left);
 		
 		this.rs[index === 0 ? 'start' : 'end'] = this.rs._seconds(left);
 	
 		//Fix the problem  when you press the button and the two arrow are underhand
 		//left.zIndex = 10 and right.zIndex=20. This is always less in this case:
-		if (index === 0 && (this.handleValue) >= 90)
+		if (index === 0 && (left) >= 90)
 				ObjLeft.style.zIndex = 25;
 		else
 				ObjLeft.style.zIndex = 10;
@@ -514,14 +507,14 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 		MaxDisP = this.player_.isFullScreen?3.75:7.5;
 		
 		if (index===0){
-			tpl.style.left = Math.max(MinP,Math.min(MaxP,(this.handleValue * 100 - MaxDisP/2))) + '%';
+			tpl.style.left = Math.max(MinP,Math.min(MaxP,(left * 100 - MaxDisP/2))) + '%';
 			
 			if ((tpr.style.left.replace("%","") - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpl.style.left = Math.max(MinP,Math.min(MaxP,tpr.style.left.replace("%","")-MaxDisP)) + '%';
 				
 			tpl.children[0].innerHTML = videojs.formatTime(this.rs._seconds(left));
 		}else{
-			tpr.style.left = Math.max(MinP,Math.min(MaxP,(this.handleValue * 100 - MaxDisP/2))) + '%';
+			tpr.style.left = Math.max(MinP,Math.min(MaxP,(left * 100 - MaxDisP/2))) + '%';
 			
 			if (((tpr.style.left.replace("%","")||100) - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpr.style.left = Math.max(MinP,Math.min(MaxP,tpl.style.left.replace("%","")-0+MaxDisP)) + '%';
@@ -562,20 +555,13 @@ videojs.SeekRSBar.prototype.calculateDistance = function(event){
 };
 
 videojs.SeekRSBar.prototype.getRSTBWidth = function() {
-	return this.rs.rstb.el_.offsetWidth;
+	return this.el_.offsetWidth;
 };
 videojs.SeekRSBar.prototype.getRSTBX = function() {
-	return videojs.findPosition(this.rs.rstb.el_).left;
+	return videojs.findPosition(this.el_).left;
 };
 videojs.SeekRSBar.prototype.getWidth = function() {
 	return this.rs.left.el_.offsetWidth;//does not matter left or right
-};
-
-videojs.SeekRSBar.prototype.getValue = function() {
-	if(this.handleValue !== null) {
-		return videojs.round(this.handleValue * this.player.duration(), 2);
-	}
-	return null;
 };
 
 
@@ -621,7 +607,7 @@ videojs.SelectionBar.prototype.updateLeft = function(left) {
 	var rightVal = this.rs.right.el_.style.left!=''?this.rs.right.el_.style.left:100;
 	var right = parseFloat(rightVal) / 100;
 	
-	var width = videojs.round((right - left),this.rs.updatePrecision); //necessary round for not get 0.6e-7 for example that it's not able for the html css width
+	var width = videojs.round((right - left),this.rs.updatePrecision); //round necessary for not get 0.6e-7 for example that it's not able for the html css width
 	
 	//(right+0.00001) is to fix the precision of the css in html
 	if(left <= (right+0.00001)) {
@@ -636,7 +622,7 @@ videojs.SelectionBar.prototype.updateRight = function(right) {
 	var leftVal = this.rs.left.el_.style.left!=''?this.rs.left.el_.style.left:0;
 	var left = parseFloat(leftVal) / 100;
 	
-	var width = videojs.round((right - left),this.rs.updatePrecision);//necessary round for not get 0.6e-7 for example that it's not able for the html css width
+	var width = videojs.round((right - left),this.rs.updatePrecision);//round necessary for not get 0.6e-7 for example that it's not able for the html css width
 	
 	//(right+0.00001) is to fix the precision of the css in html
 	if((right+0.00001) >= left) {
@@ -699,10 +685,10 @@ videojs.SelectionBarLeft.prototype.init_ = function(){
 };
 
 videojs.SelectionBarLeft.prototype.createEl = function(){
-  return videojs.Component.prototype.createEl.call(this, 'div', {
-    className: 'vjs-rangeslider-handle vjs-selectionbar-left-RS',
-    innerHTML: '<div class="vjs-selectionbar-arrow-RS"></div><div class="vjs-selectionbar-line-RS"></div>'
-  });
+	return videojs.Component.prototype.createEl.call(this, 'div', {
+		className: 'vjs-rangeslider-handle vjs-selectionbar-left-RS',
+		innerHTML: '<div class="vjs-selectionbar-arrow-RS"></div><div class="vjs-selectionbar-line-RS"></div>'
+	});
 };
 
 videojs.SelectionBarLeft.prototype.onMouseDown = function(event) {
