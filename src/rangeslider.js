@@ -517,10 +517,12 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 	
 		//Fix the problem  when you press the button and the two arrow are underhand
 		//left.zIndex = 10 and right.zIndex=20. This is always less in this case:
-		if (index === 0 && (left) >= 90)
+		if (index === 0){
+			if((left) >= 0.9)
 				ObjLeft.style.zIndex = 25;
-		else
+			else
 				ObjLeft.style.zIndex = 10;
+		}
 		
 		//-- Panel
 		var MaxP,MinP,MaxDisP;
