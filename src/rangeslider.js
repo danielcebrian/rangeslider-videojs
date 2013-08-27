@@ -30,10 +30,32 @@ function RangeSlider_(options){
 		player.trigger('loadedRangeSlider'); //Let know if the Range Slider DOM is ready
 	}
 	if (player.techName == 'Youtube'){
-		player.one('firstplay', initialVideoFinished);
+		//Detect youtube problems
+		player.one('error', function(e){
+			switch (player.error) {
+				case 2:
+					alert("The request contains an invalid parameter value. For example, this error occurs if you specify a video ID that does not have 11 characters, or if the video ID contains invalid characters, such as exclamation points or asterisks.");
+				case 5:
+					alert("The requested content cannot be played in an HTML5 player or another error related to the HTML5 player has occurred.");
+				case 100:
+					alert("The video requested was not found. This error occurs when a video has been removed (for any reason) or has been marked as private.");
+					break;
+				case 101:
+					alert("The owner of the requested video does not allow it to be played in embedded players.");
+					break;
+				case 150:
+					alert("The owner of the requested video does not allow it to be played in embedded players.");
+					break;
+				default:
+					alert("Unknown Error");
+					break;
+			}
+		});
+		player.on('firstplay', initialVideoFinished);
 	}else{
 		player.one('durationchange', initialVideoFinished);
 	}
+	
 	
 	console.log("Loaded Plugin RangeSlider");
 }
