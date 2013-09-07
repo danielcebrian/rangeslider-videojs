@@ -53,7 +53,7 @@ function RangeSlider_(options){
 		});
 		player.on('firstplay', initialVideoFinished);
 	}else{
-		player.one('durationchange', initialVideoFinished);
+		player.one('playing', initialVideoFinished);
 	}
 	
 	
@@ -525,28 +525,42 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 		}
 		
 		//-- Panel
+		var TimeText = videojs.formatTime(this.rs._seconds(left)),
+			tplTextLegth = tpl.children[0].innerHTML.length;
 		var MaxP,MinP,MaxDisP;
-		MaxP = this.player_.isFullScreen?96:92;
-		MinP = this.player_.isFullScreen?0.1:0.5;
-		MaxDisP = this.player_.isFullScreen?3.75:7.5;
+		if (tplTextLegth<=4) //0:00
+			MaxDisP = this.player_.isFullScreen?3.25:6.5;
+		else if(tplTextLegth<=5)//00:00
+			MaxDisP = this.player_.isFullScreen?4:8;
+		else//0:00:00
+			MaxDisP = this.player_.isFullScreen?5:10;
+		if(TimeText.length<=4){ //0:00
+			MaxP = this.player_.isFullScreen?97:93;
+			MinP = this.player_.isFullScreen?0.1:0.5;
+		}else if(TimeText.length<=5){//00:00
+			MaxP = this.player_.isFullScreen?96:92;
+			MinP = this.player_.isFullScreen?0.1:0.5;
+		}else{//0:00:00
+			MaxP = this.player_.isFullScreen?95:91;
+			MinP = this.player_.isFullScreen?0.1:0.5;
+		}
 		
 		if (index===0){
 			tpl.style.left = Math.max(MinP,Math.min(MaxP,(left * 100 - MaxDisP/2))) + '%';
 			
 			if ((tpr.style.left.replace("%","") - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpl.style.left = Math.max(MinP,Math.min(MaxP,tpr.style.left.replace("%","")-MaxDisP)) + '%';
-				
-			tpl.children[0].innerHTML = videojs.formatTime(this.rs._seconds(left));
+			tpl.children[0].innerHTML = TimeText;
 		}else{
 			tpr.style.left = Math.max(MinP,Math.min(MaxP,(left * 100 - MaxDisP/2))) + '%';
 			
 			if (((tpr.style.left.replace("%","")||100) - tpl.style.left.replace("%",""))<=MaxDisP)
 				tpr.style.left = Math.max(MinP,Math.min(MaxP,tpl.style.left.replace("%","")-0+MaxDisP)) + '%';
-			tpr.children[0].innerHTML = videojs.formatTime(this.rs._seconds(left));
+			tpr.children[0].innerHTML = TimeText;
 		}
 		//-- Control Time
 		if(writeControlTime){
-			var time = videojs.formatTime(this.rs._seconds(left)).split(":"),
+			var time = TimeText.split(":"),
 				h,m,s;
 			if(time.length == 2){
 				h = 00;
