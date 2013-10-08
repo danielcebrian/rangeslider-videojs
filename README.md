@@ -149,6 +149,14 @@ The video will be played in a selected section. It is necessary to enter the sta
 	mplayer.playBetween(start, end);
 ```
 
+### loopBetween() ###
+
+The video will be looped in a selected section. It is necessary to enter the start and end second.
+
+```js
+	mplayer.loopBetween(start, end);
+```
+
 ### getValueSlider() ###
 
 Get the Values of the arrows in second.
