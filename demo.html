@@ -9,7 +9,7 @@
 	<script src="lib/video-js/video.min.js"></script>
 	
 	<!--RangeSlider Pluging-->
-	<script src="build/rangeslider.min.js"></script>
+	<script src="src/rangeslider.js"></script>
 	<link href="build/rangeslider.min.css" rel="stylesheet">
 	
     <!--Demo CSS-->
@@ -42,9 +42,14 @@
 			end = document.getElementById('End').value;
 			mplayer.playBetween(start,end);
 		}
+        function loopBetween() {
+            var start = document.getElementById('Start').value;
+            var end = document.getElementById('End').value;
+            mplayer.loopBetween(start, end);
+        }
 		function getValues(){
-			var values = {};
-			values = mplayer.getValueSlider();
+			var values = mplayer.getValueSlider();
+            console.log(values);
 			document.getElementById('Start').value=videojs.round(values.start,2);
 			document.getElementById('End').value=videojs.round(values.end,2);
 		}
@@ -89,6 +94,7 @@
 	<div id="fieldSelection">
 		<legend>Select a section of the video</legend>
 		<div class="button" onClick="playBetween()">Play Between</div>
+        <div class="button" onClick="loopBetween()">Loop Between</div>
 		<div class="button" onClick="getValues()">Get Arrow Values</div><br/>
 		Start (seconds):<input type="text" value="2" id="Start">
 		End (seconds): <input type="text" value="5" id="End">
