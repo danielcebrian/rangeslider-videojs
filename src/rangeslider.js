@@ -207,6 +207,36 @@ RangeSlider.prototype = {
 		
 		this.bar.activatePlay(start,end);
 	},
+        loop: function (start, end, show) {
+            var player = this.player;
+
+            if (player) {
+                player.on("pause", videojs.bind(this, function () {
+                    this.looping = false;
+                }));
+                console.log("loop3",this.player);
+
+                show = typeof show === 'undefined' ? true : show;
+
+                if (show) {
+                    this.show();
+                    this._reset();
+                }
+                else {
+                    this.hide();
+                }
+                this._setValuesLocked(start, end);
+
+                this.timeStart = start;
+                this.timeEnd = end;
+                this.looping = true;
+
+                this.player.currentTime(start);
+                this.player.play();
+
+                this.player.on("timeupdate", videojs.bind(this, this.bar.process_loop));
+            }
+        },
 	_getArrowValue: function(index) {
 		var index = index || 0;
 		var duration = this.player.duration();
@@ -370,6 +400,10 @@ videojs.Player.prototype.setValueSlider = function(start, end){
 videojs.Player.prototype.playBetween = function(start, end){
 	return this.rangeslider.playBetween(start, end);
 };
+
+    videojs.Player.prototype.loopBetween = function (start, end) {
+        return this.rangeslider.loop(start, end);
+    };
 
 //Set a Value in second for the arrows
 videojs.Player.prototype.getValueSlider = function(){
@@ -702,6 +736,18 @@ videojs.SelectionBar.prototype._processPlay = function (){
         this.suspendPlay();
     }
 };
+
+    videojs.SelectionBar.prototype.process_loop = function () {
+        var player = this.player;
+
+        if (player && this.looping) {
+            var current_time = player.currentTime();
+
+            if (current_time < this.timeStart || this.timeEnd > 0 &&  this.timeEnd < current_time) {
+                player.currentTime(this.timeStart);
+            }
+        }
+    };
 
 /**
  * This is the left arrow to select the RangeSlider
