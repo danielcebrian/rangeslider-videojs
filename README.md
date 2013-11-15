@@ -166,4 +166,14 @@ Get the Values of the arrows in second.
 ```
 
 
+## EVENTS
 
+### sliderchange `EVENT`
+> Fired when the values of slider have changed
+
+```js
+	mplayer.on("sliderchange",function() {
+		var values = mplayer.getValueSlider();
+		...
+	});
+```
