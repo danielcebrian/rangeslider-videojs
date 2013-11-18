@@ -168,6 +168,18 @@ Get the Values of the arrows in second.
 
 ## EVENTS
 
+
+### loadedRangeSlider `EVENT`
+
+> Fired when the plugin has been loaded
+
+```js
+	mplayer.on("loadedRangeSlider",function() {
+		//init
+		...
+	});
+```
+
 ### sliderchange `EVENT`
 > Fired when the values of slider have changed
 
