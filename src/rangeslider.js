@@ -140,6 +140,8 @@ RangeSlider.prototype = {
 		this.ctpl = this.components.ControlTimePanelLeft = this.ctp.ControlTimePanelLeft;
 		this.ctpr = this.components.ControlTimePanelRight = this.ctp.ControlTimePanelRight;
 		
+		//add event listeners
+		document.addEventListener('keydown', videojs.bind(this, this._onKeyDown));
 	},
 	lock: function() {
 		this.options.locked = true;
@@ -372,6 +374,33 @@ RangeSlider.prototype = {
 	},
 	_triggerSliderChange: function(){
 		this.player.trigger("sliderchange");
+	},
+	_onKeyDown: function(event){
+		if (this.options.locked || this.options.hidden) return;
+		switch (event.keyCode) {
+			case 73: // i
+				
+				// Get current time
+				var time=this.player.currentTime();
+				
+				// Extend end if necessary
+				var range=this.getValues();
+				if (time>range.end) this.setValue(1,time);
+				
+				// Set start
+				this.setValue(0,time);
+				this._triggerSliderChange();
+				break;
+			case 79: // o
+				
+				// Get current time
+				var time=this.player.currentTime();
+				
+				// Set end
+				this.setValue(1,time);
+				this._triggerSliderChange();
+				break;
+		}
 	}
 };
 
