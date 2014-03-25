@@ -543,7 +543,7 @@ videojs.SeekRSBar.prototype.onMouseMove = function(event) {
 		this.setPosition(1,left);
 		
 	//Fix a problem with the presition in the display time
-	var currentTimeDisplay = this.player_.controlBar.currentTimeDisplay.content;
+	var currentTimeDisplay = this.player_.controlBar.currentTimeDisplay.el_;
 	currentTimeDisplay.innerHTML = '<span class="vjs-control-text">Current Time </span>'+vjs.formatTime(this.rs._seconds(left), this.player_.duration());
 	
 	// Trigger slider change
