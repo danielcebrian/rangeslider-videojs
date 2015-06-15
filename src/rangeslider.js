@@ -560,8 +560,8 @@
             this.setPosition(1, left);
 
         //Fix a problem with the presition in the display time
-        var currentTimeDisplay = this.player_.controlBar.currentTimeDisplay.el_;
-        currentTimeDisplay.innerHTML = '<span class="vjs-control-text">Current Time </span>' + vjs.formatTime(this.rs._seconds(left), this.player_.duration());
+        var ctd = this.player_.controlBar.currentTimeDisplay;
+        ctd.contentEl_.innerHTML = '<span class="vjs-control-text">' + ctd.localize('Current Time') + '</span>' + vjs.formatTime(this.rs._seconds(left), this.player_.duration());
 
         // Trigger slider change
         if (this.rs.left.pressed || this.rs.right.pressed) {
