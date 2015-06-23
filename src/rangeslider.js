@@ -332,6 +332,21 @@
                 obj, objNew, objOld;
             index = index || 0;
 
+	    // Parse input as a time stamp.
+	    function parseTimeStamp(input) {
+
+		function computeSeconds(h, m, s) {
+		    return (h | 0) * 3600 + (m | 0) * 60 + (s | 0);
+		}
+
+		var m = input.match(/^(\d+):(\d+):(\d+)/);
+		if (!m) {
+		    return null;
+		}
+
+		return computeSeconds(m[1], m[2], m[3]);
+	    }
+
             if (newHour != timeOld[0]) {
                 obj = h;
                 objNew = newHour;
@@ -360,7 +375,7 @@
             newMin = newMin == "" ? 0 : newMin;
             newSec = newSec == "" ? 0 : newSec;
 
-            durationSel = videojs.TextTrack.prototype.parseCueTime(newHour + ":" + newMin + ":" + newSec);
+            durationSel = parseTimeStamp(newHour + ":" + newMin + ":" + newSec);
             if (durationSel > duration) {
                 obj.value = objOld;
                 obj.style.border = "1px solid red";
@@ -374,14 +389,14 @@
             }
             if (index === 1) {
                 var oldTimeLeft = this.ctpl.el_.children,
-                    durationSelLeft = videojs.TextTrack.prototype.parseCueTime(oldTimeLeft[0].value + ":" + oldTimeLeft[1].value + ":" + oldTimeLeft[2].value);
+                    durationSelLeft = parseTimeStamp(oldTimeLeft[0].value + ":" + oldTimeLeft[1].value + ":" + oldTimeLeft[2].value);
                 if (durationSel < durationSelLeft) {
                     obj.style.border = "1px solid red";
                 }
             } else {
 
                 var oldTimeRight = this.ctpr.el_.children,
-                    durationSelRight = videojs.TextTrack.prototype.parseCueTime(oldTimeRight[0].value + ":" + oldTimeRight[1].value + ":" + oldTimeRight[2].value);
+                    durationSelRight = parseTimeStamp(oldTimeRight[0].value + ":" + oldTimeRight[1].value + ":" + oldTimeRight[2].value);
                 if (durationSel > durationSelRight) {
                     obj.style.border = "1px solid red";
                 }
