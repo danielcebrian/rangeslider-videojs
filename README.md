@@ -1,3 +1,7 @@
+IMPORTANT!
+==================
+This plugin will no longer be maintained. Welcome those who want to continue the project.
+
 Rangeslider-videojs
 ==================
 ##Ranger Slider Plugin for Video JS Player
