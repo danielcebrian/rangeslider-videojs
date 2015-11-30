@@ -332,6 +332,21 @@
                 obj, objNew, objOld;
             index = index || 0;
 
+	    // Parse input as a time stamp.
+	    function parseTimeStamp(input) {
+
+		function computeSeconds(h, m, s) {
+		    return (h | 0) * 3600 + (m | 0) * 60 + (s | 0);
+		}
+
+		var m = input.match(/^(\d+):(\d+):(\d+)/);
+		if (!m) {
+		    return null;
+		}
+
+		return computeSeconds(m[1], m[2], m[3]);
+	    }
+
             if (newHour != timeOld[0]) {
                 obj = h;
                 objNew = newHour;
@@ -349,6 +364,10 @@
             }
 
             var duration = this.player.duration() || 0,
+		oldTimeLeft = this.ctpl.el_.children,
+		oldTimeRight = this.ctpr.el_.children,		
+                durationSelLeft = parseTimeStamp(oldTimeLeft[0].value + ":" + oldTimeLeft[1].value + ":" + oldTimeLeft[2].value),
+                durationSelRight = parseTimeStamp(oldTimeRight[0].value + ":" + oldTimeRight[1].value + ":" + oldTimeRight[2].value),
                 durationSel;
 
             var intRegex = /^\d+$/;//check if the objNew is an integer
@@ -360,7 +379,7 @@
             newMin = newMin == "" ? 0 : newMin;
             newSec = newSec == "" ? 0 : newSec;
 
-            durationSel = videojs.TextTrack.prototype.parseCueTime(newHour + ":" + newMin + ":" + newSec);
+            durationSel = parseTimeStamp(newHour + ":" + newMin + ":" + newSec);
             if (durationSel > duration) {
                 obj.value = objOld;
                 obj.style.border = "1px solid red";
@@ -373,18 +392,26 @@
                 this._triggerSliderChange();
             }
             if (index === 1) {
-                var oldTimeLeft = this.ctpl.el_.children,
-                    durationSelLeft = videojs.TextTrack.prototype.parseCueTime(oldTimeLeft[0].value + ":" + oldTimeLeft[1].value + ":" + oldTimeLeft[2].value);
                 if (durationSel < durationSelLeft) {
                     obj.style.border = "1px solid red";
                 }
+		else {
+                    oldTimeLeft[0].style.border = oldTimeLeft[1].style.border = oldTimeLeft[2].style.border = "1px solid transparent";
+                    this.setValue(0, durationSelLeft, false);
+                    this._triggerSliderChange();
+		}
             } else {
-
-                var oldTimeRight = this.ctpr.el_.children,
-                    durationSelRight = videojs.TextTrack.prototype.parseCueTime(oldTimeRight[0].value + ":" + oldTimeRight[1].value + ":" + oldTimeRight[2].value);
                 if (durationSel > durationSelRight) {
                     obj.style.border = "1px solid red";
                 }
+		else {
+		    // Keep the value of 'ctpr' when it is equal to the duration of video
+		    if(Math.floor(duration) !== durationSelRight) {
+			oldTimeRight[0].style.border = oldTimeRight[1].style.border = oldTimeRight[2].style.border = "1px solid transparent";
+			this.setValue(1, durationSelRight, false);
+			this._triggerSliderChange();
+		    }
+		}
             }
         },
         _triggerSliderChange: function () {
@@ -794,7 +821,7 @@
             if (!this.fired) { //Do nothing if end has already been called
                 return;
             }
-            this.fired = false; //Set fired flat to false
+            this.fired = false; //Set fired flag to false
             this.player_.pause(); //Call end function
             this.player_.currentTime(this.timeEnd);
             this.suspendPlay();
@@ -1033,7 +1060,18 @@
         this.rs.ctpr.el_.children[2].disabled = enable ? "" : "disabled";
     };
 
-
+    // Set delay for keyup events
+    var keyUpDelay = function () {
+	var timer = 0;
+	return function (index, ms) {
+	    var self = this;
+	    clearTimeout(timer);
+	    timer = setTimeout(function () {
+		self.rs._checkControlTime(index, self.el_.children, self.timeOld)
+	    }, ms);
+	}
+    }();
+    
     /**
      * This is the control left time panel
      * @param {videojs.Player|Object} player
@@ -1068,7 +1106,7 @@
     };
 
     videojs.ControlTimePanelLeft.prototype.onKeyUp = function (event) {
-        this.rs._checkControlTime(0, this.el_.children, this.timeOld);
+	keyUpDelay.call(this, 0, 300);
     };
 
 
@@ -1107,6 +1145,6 @@
     };
 
     videojs.ControlTimePanelRight.prototype.onKeyUp = function (event) {
-        this.rs._checkControlTime(1, this.el_.children, this.timeOld);
+	keyUpDelay.call(this, 1, 300);
     };
 })();
